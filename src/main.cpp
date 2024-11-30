@@ -51,7 +51,7 @@ void loop()
 
   // Send temperature via selected communication method
   DeviceAddress deviceAddress;
-  if (!temperatureSensor.getAddress(deviceAddress, 0))
+  if (!temperatureSensor.getAddress(deviceAddress, 0) || tempCelsius == DEVICE_DISCONNECTED_C)
   {
     Serial.println("temperature sensor disconnected");
   }

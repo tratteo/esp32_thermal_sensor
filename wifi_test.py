@@ -3,7 +3,7 @@ from flask import Flask, request, jsonify
 app = Flask(__name__)
 
 
-@app.route("/temperature", methods=["POST"])
+@app.route("/api/temperature", methods=["POST"])
 def receive_temperature():
     data = request.json
     print("Received data:", data)
@@ -11,4 +11,4 @@ def receive_temperature():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=3000)
+    app.run(host="0.0.0.0", port=5050)

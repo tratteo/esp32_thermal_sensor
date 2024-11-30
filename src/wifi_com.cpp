@@ -6,6 +6,7 @@
 
 void WifiCom::begin()
 {
+    ComInterface::begin();
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
     unsigned long startAttemptTime = millis();
@@ -37,11 +38,11 @@ void WifiCom::sendTemperatureData(float temperature, const String &deviceId)
         // Prepare JSON payload
         JsonDocument doc;
         doc["temperature"] = temperature;
-        doc["sensor_id"] = deviceId;
-        doc["board_id"] = ESP.getEfuseMac();
+        doc["sensorId"] = deviceId;
+        doc["boardId"] = getBoardMac();
         doc["location"] = SENSOR_LOCATION;
+        doc["timestamp"] = getEpochTimestamp();
         doc["com"] = "wifi";
-        doc["ip"] = WiFi.localIP();
 
         String jsonPayload;
         serializeJson(doc, jsonPayload);
