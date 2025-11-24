@@ -3,6 +3,9 @@
 #include "../lib/config.h"
 #include "../lib/com.h"
 
+// Conversion factor for micro seconds to seconds
+#define uS_TO_S_FACTOR 1000000ULL
+
 OneWire oneWire(ONE_WIRE_BUS_PIN);
 DallasTemperature temperatureSensor(&oneWire);
 
@@ -28,6 +31,10 @@ void setup()
   Serial.begin(115200);
   Serial.println();
 
+  // Print wakeup reason (useful for debugging)
+  Serial.print("Wakeup count: ");
+  Serial.println(esp_sleep_get_wakeup_cause());
+
   temperatureSensor.begin();
 
 #if COM_MODE == COM_MODE_WIFI
@@ -39,10 +46,7 @@ void setup()
 #endif
 
   communicationMethod->begin();
-}
 
-void loop()
-{
   // Request temperature readings
   temperatureSensor.requestTemperatures();
 
@@ -60,6 +64,23 @@ void loop()
     communicationMethod->sendTemperatureData(tempCelsius, getDeviceAddressString(deviceAddress));
   }
 
-  // Wait before next reading
-  delay(TEMPERATURE_READ_INTERVAL_MS);
+  // Clean up
+  delete communicationMethod;
+  communicationMethod = nullptr;
+
+  // Configure deep sleep timer
+  uint64_t sleepTimeUs = TEMPERATURE_READ_INTERVAL_MS * 1000ULL;
+  esp_sleep_enable_timer_wakeup(sleepTimeUs);
+
+  Serial.println("Entering deep sleep...");
+  Serial.flush(); // Wait for serial to finish transmitting
+
+  // Enter deep sleep
+  esp_deep_sleep_start();
+}
+
+void loop()
+{
+  // This will never be called since ESP32 enters deep sleep
+  // and restarts from setup() on wakeup
 }
