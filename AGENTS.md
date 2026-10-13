@@ -2,19 +2,24 @@
 
 ESP32 (esp32dev) firmware that reads a DS18B20 temperature sensor, POSTs one reading, then deep-sleeps. PlatformIO + Arduino framework. No tests, no CI, no lint/typecheck.
 
+End-user documentation lives in `README.md`; this file is for agents and contributors.
+
 ## Commands
 
 - Build: `pio run`
 - Build + flash: `pio run -t upload`
 - Serial monitor (115200 baud): `pio device monitor`
-- Mock server for the temperature endpoint (receives `POST /api/temperature` on port 5050): `python wifi_test.py`
+- Mock server for the temperature endpoint (receives `POST /api/temperature` on port 5050, requires Flask): `python wifi_test.py`
 
 ## Architecture
 
 - `src/main.cpp`: entrypoint. Reads sensor once in `setup()`, sends data, calls `esp_deep_sleep_start()`. `loop()` is never reached.
 - `lib/com.h`: `ComInterface` base class plus `WifiCom` and `SerialCom`. Implemented in `src/wifi_com.cpp` and `src/serial_com.cpp`.
-- `lib/config.h`: committed configuration and safe defaults (COM_MODE, sensor pin, read interval, server URL). Real credentials/overrides live in `lib/config_local.h` (gitignored), created from `lib/config_local.example.h`; `config.h` picks it up via `__has_include` plus `#ifndef` fallbacks.
+- `lib/config.h`: committed configuration and safe placeholder defaults (COM_MODE, sensor pin, read interval). Values are overridable via `#ifndef`, and the file pulls in `lib/config_local.h` (gitignored) through `__has_include`.
+- `lib/config_local.h`: real credentials and deployment values, gitignored. Created by copying the committed template `lib/config_local.example.h`.
+- `README.md`: user-facing overview, setup, payload format, and troubleshooting.
 - Headers are included with relative paths (`../lib/config.h`), not via PlatformIO library resolution. `.vscode/c_cpp_properties.json` is auto-generated; edit `platformio.ini`, not that file.
+- `.gitattributes` sets `* text=auto`; keep source and docs normalized to LF.
 
 ## Gotchas
 
