@@ -42,6 +42,7 @@ void WifiCom::sendTemperatureData(float temperature, const String &deviceId)
         doc["boardId"] = getBoardMac();
         doc["location"] = SENSOR_LOCATION;
         doc["timestamp"] = getEpochTimestamp();
+        doc["informational"] = INFORMATIONAL;
         doc["com"] = "wifi";
 
         String jsonPayload;
